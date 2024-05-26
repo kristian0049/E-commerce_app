@@ -1,0 +1,147 @@
+1.Plan your project
+
+Visualize your end result. What is it built with? What can it do? Make sure that it satisfies all of the project objectives. The following tasks will help you identify natural break points.
+
+hint:
+Make a timeline for yourself and avoid the temptation to build things that aren’t required. Setting firm boundaries and deadlines will keep you on track and prevent scope creep.
+----
+
+2.Set up the React project
+
+Set up the necessary folders and files for building your React frontend.
+hint:
+You can use create-react-app to easily set up the necessary folders and files needed for a basic React app. It is a good idea to initialize your React project as a subdirectory inside your project root directory. Remember to track your changes to your code using git.
+----
+
+3.Set up React Router
+
+Set up React Router to be able to navigate between different pages of your app.
+
+Hint:
+Refer to this documentation if you need help getting started with using React Router. Think about how you’d want to structure your files as you begin adding pages for your app. For example, you may consider having a components directory that contains all your React components.
+---
+
+4.Build the registration page
+
+The registration page should allow the user to create a new account using a username and password. It should also include a link to the login page if the user already has an existing account.
+
+Hint:
+Create a form for users to register a new account. Make sure you modify your registration endpoint handler to hash and salt the password in order to ensure secure storage! We recommend using bcryptjs to secure your passwords.
+
+After users register an account, they should automatically be signed in as well.
+---
+
+5.
+Build the login page
+
+The login page should allow the user to sign in using either a username and password or a third-party service like Google or Facebook. It should also include a link to the register page if the user does not have an existing account.
+
+Hint:
+Create a form for users to sign in using a username and password. Also include buttons that can redirect users to log in using a third-party service if they choose. Remember to add functionality to the login endpoint to hash the incoming password in order to compare it correctly to the one on file.
+---
+
+6.Set up third-party login
+
+Add the logic for handling login using a third-party service.
+Hint:
+Passport.js makes it easy to handle user authentication using a third-party service like Google or Facebook. Look here for the various authentication strategies you can use. This will require modification of your existing REST API to support this functionality.
+---
+
+7.Enable session support
+
+Enable session support for your application in order to maintain login state.
+
+Hint:
+The express-session module is a popular choice for session management. As you implement the login functionality, you’ll want to establish a new session upon successful authentication.
+---
+
+8.Add logout functionality
+
+Allow users to log out of their account from any page if they are signed in.
+Hint:
+Passport.js provides a logout() function to easily terminate a login session from any route handler.
+---
+
+9.Build the products listing page
+
+The products listing page will be the place for users to browse through the products available for sale. Each product should display a name, description, and image.
+
+Hint:
+Create the React components needed to help build your page. For example, you may want a ProductList component to display the list of products and Product component for rendering a particular product.
+
+Use the API endpoints you’ve previously created to fetch the necessary information to be displayed on your page. Make sure to enable CORS to be able to make the requests. If you want a refresher on making requests in JavaScript, you can review this module.
+---
+
+10.Build the product details page
+
+Each product in the listings page should link to a details page containing more information about that product. The product details page should also provide functionality allowing users to add the detailed item to their carts.
+Hint:
+Create the necessary component(s) for the details page and fetch data from your API to be displayed. Update your products listing page to link to the details page for each product.
+---
+
+11.Track cart items
+
+On each product details page, there should be a button that allows users to add that item to their cart. Keep track of which items have been added to cart.
+Hint:
+Leverage your cart endpoints from your REST API to add or delete products from the current active cart. Make sure you are able to distinguish between items in the current cart and items from past orders. Current cart items will be visible to the user on the checkout page and past items will be visible in order history.
+
+---
+12.Build the checkout flow
+
+The checkout page should display the current cart items and allow users to complete their purchase.
+Hint:
+Stripe is a popular payment processor you can use. Refer to this documentation for more information on integrating Stripe into a React project (Stripe Elements). Remember to modify your REST API endpoint for handling charges to utilize Stripe. After you finish implementing this, feel free to use test card numbers from here to test your new feature.
+--
+13.Allow access to protected resources
+
+Some features on your site should only be accessible after the user logs in, such as the ability to add items to the cart or complete an order. Make sure to redirect users to the login page if they are trying to perform these tasks and are not signed in.
+
+Hint:
+When trying to access protected resources, make sure the session identifier is always being passed in with your request. On the backend, check the ID to make sure the user is authorized before returning the requested information. If the user is not authorized, return a 401 Unauthorized response and redirect the user accordingly.
+
+One option is to write an authentication middleware that can perform this ID check, and add that in front of the API endpoints that require protection.
+---
+
+14.Set up order history
+
+Users should be able to access their order history when they are logged in, including details about the order status and purchased items.
+Hint:
+All past order information should be made viewable to a logged-in user. Set up the pages needed for fetching and displaying the order history. Make sure to protect these resources from unauthorized access.
+---
+
+15.Deploy to Render
+
+Congratulations on building your own e-commerce app! Deploy your application using Render and share it with the world.
+Hint:
+If you need a refresher on how to do this, take a look at the Render documentation.
+---
+16.You’re welcome to expand your app beyond these project tasks and get creative!
+
+For example, one feature you can add is to enable users to rate and review each product. You can also add functionality to allow for guest checkout.
+
+Some additional, more complicated extensions could look as follows:
+
+Add admin management panel
+
+    Setup protected API endpoints for admin-level management access of products, customer orders, etc.
+    Create admin client UI with React to easily manage data.
+
+Add email notification system
+
+    Setup an automated email service on the server to send emails to customers on completion of a purchase.
+    Setup an automated cron job to send email reminders to customers when products have been in their carts for a certain duration of time.
+
+Add ability to refund customer orders
+
+    Setup webhook(s) that interfaces with payment processor and deals with actions such as refunds.
+    When a refund is processed in Stripe, update order accordingly and email customers of successful refund and change to order status.
+
+Add ability to persist and re-use payment methods
+
+    Leverage Stripe’s built-in PCI compliant methods by creating a payment source via their API.
+    Associate the payment source generated with the user account in your own database.
+
+Add A/B testing capabilities to your front-end
+
+    Implement A/B testing paradigm to serve and track different layouts to customers.
+

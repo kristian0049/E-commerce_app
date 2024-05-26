@@ -1,0 +1,29 @@
+1.Create a PostgreSQL database and add the tables from your design
+2.Set up your application to be able to interface with the PostgreSQL database.
+3.Plan the API endpoints that will be used in retrieving data from your database.
+5Set up user registration
+
+Add the logic for handling registration of new users.
+6Add the logic for handling login using a username and password.
+7.Add the logic for handling CRUD operations related to products. 
+8.Set up product endpoints
+
+Add the logic for handling CRUD operations related to products.
+9.Set up user endpoints
+
+Add the logic for handling CRUD operations related to users and their accounts
+10.Set up cart endpoint
+
+Add the logic for handling CRUD operations related to a user's cart.
+11.Set up checkout endpoint
+
+Add the logic for handling checkout. There is no need to actually try and charge somebody yet; charging will come in a later evolution of this project. For now, we will assume that all charges succeed for ease of development (still add in error handling 
+12.Set up order endpoints
+
+Add the logic for handling CRUD operations related to orders.
+13.Document the API
+
+Document the API you have built by adding and configuring Swagger to your project.
+14.Next Steps
+
+You're welcome to expand your API beyond these project tasks and get creative! A future portfolio project will build on top of what you have built here, covering tasks for creating the client side of your e-commerce application. If you don't want to wait
