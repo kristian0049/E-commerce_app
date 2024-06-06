@@ -10,6 +10,15 @@ const url = `https://api.mobygames.com/v1/genres?api_key=${api}`;
 superagent.get(url)
 .set('accept','json')
 .end(async (err,res)=>{
- 
+    const genres =res._body.genres;
+    console.log(genres);
+    const arr = []
+    // for (let i = 0; i < genres.length; i++){
+    //     const {genre_category, genre_name} = genres[i];
 
+    //     if(genre_category === "Basic Genres"){
+    //         arr.push(genre_name);
+    //     }
+    // }
+    // console.log(genre_name);
 });
