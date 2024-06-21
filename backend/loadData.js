@@ -3,22 +3,18 @@ require('dotenv').config();
 const api = process.env.MOBYGAMES_API;
 const superagent = require('superagent');
 const db = require('./db/index.js');
-const url = `https://api.mobygames.com/v1/genres?api_key=${api}`;
+const url = `https://api.mobygames.com/v1/games?api_key=${api}`;
 
+async function fetch_categories(){
+    const product_category = await db.query("SELECT name FROM product_category","");
+    console.log(product_category.rows);
+}
 //need to create a query to add games to db
+
 
 superagent.get(url)
 .set('accept','json')
 .end(async (err,res)=>{
-    const genres =res._body.genres;
-    console.log(genres);
-    const arr = []
-    // for (let i = 0; i < genres.length; i++){
-    //     const {genre_category, genre_name} = genres[i];
-
-    //     if(genre_category === "Basic Genres"){
-    //         arr.push(genre_name);
-    //     }
-    // }
-    // console.log(genre_name);
+    fetch_categories();
+    /* */
 });
