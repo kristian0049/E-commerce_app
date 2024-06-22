@@ -27,8 +27,10 @@ async function fetch_categories(){
         
         setTimeout( async ()=> {
             const res = await superagent.get(gameUrl).set('accept','json');
-            console.log(res);
-        },1500);
+            console.log(res._body);
+        },1500*(i+1));
         
     }
 })();
+
+
