@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.1
--- Dumped by pg_dump version 16.1
+-- Dumped from database version 14.12 (Ubuntu 14.12-0ubuntu0.22.04.1)
+-- Dumped by pg_dump version 14.12 (Ubuntu 14.12-0ubuntu0.22.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -239,6 +239,26 @@ COPY public.cart_item (id, session_id, product_id, quantity, created_at, modifie
 --
 
 COPY public.discount (id, discount_percent, active, created_at, modified_at, deleted_at) FROM stdin;
+1	5	f	2024-06-23 22:11:50.164558	\N	\N
+2	10	f	2024-06-23 22:11:50.164558	\N	\N
+3	15	f	2024-06-23 22:11:50.164558	\N	\N
+4	20	f	2024-06-23 22:11:50.164558	\N	\N
+5	25	f	2024-06-23 22:11:50.164558	\N	\N
+6	30	f	2024-06-23 22:11:50.164558	\N	\N
+7	35	f	2024-06-23 22:11:50.164558	\N	\N
+8	40	f	2024-06-23 22:11:50.164558	\N	\N
+9	45	f	2024-06-23 22:11:50.164558	\N	\N
+10	50	f	2024-06-23 22:11:50.164558	\N	\N
+11	55	f	2024-06-23 22:11:50.164558	\N	\N
+12	60	f	2024-06-23 22:11:50.164558	\N	\N
+13	65	f	2024-06-23 22:11:50.164558	\N	\N
+14	70	f	2024-06-23 22:11:50.164558	\N	\N
+15	75	f	2024-06-23 22:11:50.164558	\N	\N
+16	80	f	2024-06-23 22:11:50.164558	\N	\N
+17	85	f	2024-06-23 22:11:50.164558	\N	\N
+18	90	f	2024-06-23 22:11:50.164558	\N	\N
+19	95	f	2024-06-23 22:11:50.164558	\N	\N
+20	100	f	2024-06-23 22:11:50.164558	\N	\N
 \.
 
 
@@ -271,6 +291,17 @@ COPY public.payment_details (id, order_id, amount, provider, status, created_at,
 --
 
 COPY public.product (id, name, description, stock_keeping_unit, category_id, inventory_id, price, discount_id, created_at, modified_at, deleted_at) FROM stdin;
+1	Baldur\\s Gate 3	An rpg game where you make your own decisions.	20	50	1	100.00	\N	2024-06-23 20:12:55.078383	\N	\N
+2	XCOM Enemy Unknown	A tactical, strategic game where you command your squad of marines to defeat invading aliens.	14	4	2	79.00	\N	2024-06-23 20:12:55.078383	\N	\N
+3	Counter-Strike Global Offensive	A competive first-person shooter.	100	1	3	25.00	\N	2024-06-23 20:12:55.078383	\N	\N
+4	Counter-Strike: Source	A competive first-person shooter.	40	1	4	10.00	\N	2024-06-23 20:12:55.078383	\N	\N
+5	Need For Speed: Underground 2	Explore the open world city in Underground 2, where players can explore the city, unlocking areas by completing races.	6	6	5	10.00	\N	2024-06-23 20:12:55.078383	\N	\N
+6	FIFA 12	Competitive Soccer Game	37	5	6	37.00	\N	2024-06-23 20:12:55.078383	\N	\N
+7	Age of Empires 3	Age of Empires III portrays the European colonization of the Americas, between approximately 1492 and 1876 AD. Command one of eight mighty European powers and colonize vast, uncharted territory.	4	4	7	15.00	\N	2024-06-23 20:12:55.078383	\N	\N
+8	Farming Simulator 	Farming Simulator is a farming simulation video game series developed by GIANTS Software.	123	3	8	20.00	\N	2024-06-23 20:12:55.078383	\N	\N
+9	The Legend of Zelda: Breath of the Wild	After a 100-year slumber, Link wakes up alone in a world he no longer remembers. Now the legendary hero must explore a vast and dangerous land and regain his memories before Hyrule is lost forever. Armed only with what he can scavenge, Link sets out to find answers and the resources needed to survive.	150	2	9	60.00	\N	2024-06-23 20:12:55.078383	\N	\N
+10	Portal	A test subject wakes up in a scientific facility controlled by a sadistic artificial intelligence and must escape with the help of the only instrument she has -a gun that makes portals.	40	118	10	13.00	\N	2024-06-23 20:12:55.078383	\N	\N
+11	StarCraft 2	Four years after the events of StarCraft: Brood War (1998), Jim Raynor fights against the Dominion and begins a search for artifacts when at the same time the Zerg attack once again.	80	4	11	270.00	\N	2024-06-23 20:12:55.078383	\N	\N
 \.
 
 
@@ -279,20 +310,14 @@ COPY public.product (id, name, description, stock_keeping_unit, category_id, inv
 --
 
 COPY public.product_category (id, name, created_at, modified_at, deleted_at) FROM stdin;
-0	Action	2024-06-02 19:49:41.214	\N	\N
-1	Add-on	2024-06-02 19:49:41.214	\N	\N
-2	Adventure	2024-06-02 19:49:41.214	\N	\N
-3	Compilation	2024-06-02 19:49:41.214	\N	\N
-4	Educational	2024-06-02 19:49:41.214	\N	\N
-5	Gambling	2024-06-02 19:49:41.214	\N	\N
-6	Idle	2024-06-02 19:49:41.214	\N	\N
-7	Puzzle	2024-06-02 19:49:41.214	\N	\N
-8	Racing / Driving	2024-06-02 19:49:41.214	\N	\N
-9	Role-playing (RPG)	2024-06-02 19:49:41.214	\N	\N
-10	Simulation	2024-06-02 19:49:41.214	\N	\N
-11	Special edition	2024-06-02 19:49:41.214	\N	\N
-12	Sports	2024-06-02 19:49:41.214	\N	\N
-13	Strategy / tactics	2024-06-02 19:49:41.214	\N	\N
+1	Action	2024-06-22 15:39:56.3	\N	\N
+2	Adventure	2024-06-22 15:39:56.3	\N	\N
+118	Puzzle	2024-06-22 15:39:56.3	\N	\N
+6	Racing / Driving	2024-06-22 15:39:56.3	\N	\N
+50	Role-playing (RPG)	2024-06-22 15:39:56.3	\N	\N
+3	Simulation	2024-06-22 15:39:56.3	\N	\N
+5	Sports	2024-06-22 15:39:56.3	\N	\N
+4	Strategy / tactics	2024-06-22 15:39:56.3	\N	\N
 \.
 
 
@@ -301,6 +326,18 @@ COPY public.product_category (id, name, created_at, modified_at, deleted_at) FRO
 --
 
 COPY public.product_inventory (id, quantity, created_at, modified_at, deleted_at) FROM stdin;
+1	15	2024-06-23 21:55:27.221979	\N	\N
+2	100	2024-06-23 21:55:27.221979	\N	\N
+3	40	2024-06-23 21:55:27.221979	\N	\N
+4	112	2024-06-23 21:55:27.221979	\N	\N
+5	8	2024-06-23 21:55:27.221979	\N	\N
+6	66	2024-06-23 21:55:27.221979	\N	\N
+7	23	2024-06-23 21:55:27.221979	\N	\N
+8	200	2024-06-23 21:55:27.221979	\N	\N
+9	49	2024-06-23 21:55:27.221979	\N	\N
+10	78	2024-06-23 21:55:27.221979	\N	\N
+11	2	2024-06-23 21:55:27.221979	\N	\N
+12	25	2024-06-23 21:55:27.221979	\N	\N
 \.
 
 
@@ -317,6 +354,7 @@ COPY public.shopping_session (id, user_id, total, created_at, modified_at) FROM 
 --
 
 COPY public."user" (id, username, password, first_name, last_name, telephone, created_at, modified_at) FROM stdin;
+1	john0049	snow0049	John	Snow	45436435634	2024-06-23 22:45:07.185584	2024-06-23 22:45:07.185584
 \.
 
 
@@ -325,6 +363,7 @@ COPY public."user" (id, username, password, first_name, last_name, telephone, cr
 --
 
 COPY public.user_address (id, user_id, address_line1, address_line2, city, postal_code, country, telephone, mobile) FROM stdin;
+1	1	Georgi Benkovski 32	Dolno More 2	Varna	6000	Bulgaria	+35956321490	+35912345678
 \.
 
 
@@ -333,6 +372,7 @@ COPY public.user_address (id, user_id, address_line1, address_line2, city, posta
 --
 
 COPY public.user_payment (id, user_id, payment_type, provider, account_no, expiry) FROM stdin;
+1	1	debit_card	OBB	654920	2024-06-23
 \.
 
 
