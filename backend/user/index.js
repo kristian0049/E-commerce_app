@@ -17,3 +17,13 @@
 
 //api endpoint to fetch user payment by user id
 //Upon opening the profile page or when paying fetch user's address information if available
+
+const express = require('express');
+const router = express.Router();
+
+const db = require('./db/index.js');
+
+const date =  Date.now();
+
+
+
