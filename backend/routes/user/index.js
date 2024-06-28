@@ -21,10 +21,19 @@
 const express = require('express');
 const router = express.Router();
 
-const db = require('./db/index.js');
+const db = require('../../db/index.js');
 
-const date =  Date.now();
+router.get('/', (req,res)=>{
+    res.send("Hello from user file");
+});
 
-
+router.post('/register',(req,res)=>{
+    const {username, password, email, first_name, last_name, telephone} = req.body;
+    const created_at = new Date();
+    const response = db.query('INSERT INTO public.user (username, password, first_name, last_name, telephone, created_at, email) VALUES ($1, $2, $3, $4, $5, $6, $7);',[username, password, first_name, last_name, telephone, created_at, email  ])
+    res.send(response.rows);
+});
 
 //Error handling is last, after all route calls
+
+module.exports = router;

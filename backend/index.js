@@ -1,12 +1,17 @@
 const express = require ('express');
+const helmet = require('helmet');
 const app = express();
 const port = 3000;
-
 const db = require('./db/index.js');
+const user = require('./routes/user/index.js');
+
+app.use(helmet());
+app.use(express.json());
+
+app.use('/user',user);
 
 app.get('/', async (req, res) => {//Upon entering the site 
-    const data = await db.query('SELECT * FROM product;',"");
-    res.send( ""+data.rows[0].now );
+    res.send("Hello from Kris");
 });
 
 app.listen(port, () => {
