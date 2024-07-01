@@ -20,8 +20,8 @@
 
 const express = require('express');
 const router = express.Router();
-
 const db = require('../../db/index.js');
+const {} = require('express-validator');
 
 router.get('/', (req,res)=>{
     res.send("Hello from user file");
@@ -33,6 +33,27 @@ router.post('/register',(req,res)=>{
     const response = db.query('INSERT INTO public.user (username, password, first_name, last_name, telephone, created_at, email) VALUES ($1, $2, $3, $4, $5, $6, $7);',[username, password, first_name, last_name, telephone, created_at, email  ])
     res.send(response.rows);
 });
+
+router.post('/login',(req,res)=>{
+
+});
+
+router.get('/user/:name',(req,res)=>{
+
+});
+
+
+//fetch user_address table values by user id
+router.get('/user/:name/user_address', (req,res)=>{
+
+});
+
+//update user_address value by user id
+router.put('/user/:name/user_address', (req, res) =>{
+
+})
+
+
 
 //Error handling is last, after all route calls
 
