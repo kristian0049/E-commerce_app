@@ -21,16 +21,21 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../../db/index.js');
-const {} = require('express-validator');
+const {body} = require('express-validator');
 
 router.get('/', (req,res)=>{
     res.send("Hello from user file");
 });
 
-router.post('/register',(req,res)=>{
+router.post('/register',body('email').notEmpty().isEmail(),
+    body('username').trim().notEmpty().isString().not().isURL(),
+    body('password').trim().notEmpty().isString().isStrongPassword({minLength:6,minUppercase:1,minNumbers:4,minSymbols:1}).not().isURL(),
+    body('fist_name').trim().notEmpty().isString().not().isURL(),
+    body('last_name').trim().notEmpty().isString().not().isURL(),
+    body('telephone').trim().notEmpty().isMobilePhone('any').not().isURL(),(req,res)=>{
     const {username, password, email, first_name, last_name, telephone} = req.body;
     const created_at = new Date();
-    const response = db.query('INSERT INTO public.user (username, password, first_name, last_name, telephone, created_at, email) VALUES ($1, $2, $3, $4, $5, $6, $7);',[username, password, first_name, last_name, telephone, created_at, email  ])
+    const response = db.query('INSERT INTO public.user (username, password, first_name, last_name, telephone, created_at, email) VALUES ($1, $2, $3, $4, $5, $6, $7);',[username, password, first_name, last_name, telephone, created_at, email]);
     res.send(response.rows);
 });
 
@@ -47,6 +52,8 @@ router.get('/user/:name',(req,res)=>{
 router.get('/user/:name/user_address', (req,res)=>{
 
 });
+
+
 
 //update user_address value by user id
 router.put('/user/:name/user_address', (req, res) =>{
