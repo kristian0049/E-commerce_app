@@ -21,29 +21,41 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../../db/index.js');
-const {body} = require('express-validator');
+const {body, validationResult} = require('express-validator');
 
 router.get('/', (req,res)=>{
     res.send("Hello from user file");
 });
 
-router.post('/register',body('email').notEmpty().isEmail(),
-    body('username').trim().notEmpty().isString().not().isURL(),
+router.post('/register',
+    body('email').notEmpty().isEmail().isLength({max:255}),
+    body('username').trim().notEmpty().isString().not().isURL().isLength({max:255}),
     body('password').trim().notEmpty().isString().isStrongPassword({minLength:6,minUppercase:1,minNumbers:4,minSymbols:1}).not().isURL(),
-    body('fist_name').trim().notEmpty().isString().not().isURL(),
-    body('last_name').trim().notEmpty().isString().not().isURL(),
-    body('telephone').trim().notEmpty().isMobilePhone('any').not().isURL(),(req,res)=>{
+    body('fist_name').trim().notEmpty().isString().not().isURL().isLength({max:255}),
+    body('last_name').trim().notEmpty().isString().not().isURL().isLength({max:255}),
+    body('telephone').trim().notEmpty().isMobilePhone('any').not().isURL().isLength({max:255}),
+    (req,res)=>{
+    /*Check first if we had any issues with user input
+    If we did, return otherwise create an account*/
+    const result = validationResult(req);
+    if(!result.isEmpty()){
+        const errors = result.array();
+        
+        res.status(400).send(errors);
+        return;
+    }
+
     const {username, password, email, first_name, last_name, telephone} = req.body;
     const created_at = new Date();
     const response = db.query('INSERT INTO public.user (username, password, first_name, last_name, telephone, created_at, email) VALUES ($1, $2, $3, $4, $5, $6, $7);',[username, password, first_name, last_name, telephone, created_at, email]);
-    res.send(response.rows);
+    res.status(201).send("Your account was registered! :)");
 });
 
 router.post('/login',(req,res)=>{
 
 });
 
-router.get('/user/:name',(req,res)=>{
+router.get('/:name',(req,res)=>{
 
 });
 
