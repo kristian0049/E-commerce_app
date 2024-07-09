@@ -22,6 +22,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../../db/index.js');
 const {body, validationResult} = require('express-validator');
+const bcrypt = require('bcrypt');
 
 router.get('/', (req,res)=>{
     res.send("Hello from user file");
@@ -31,7 +32,7 @@ router.post('/register',
     body('email').notEmpty().isEmail().isLength({max:255}),
     body('username').trim().notEmpty().isString().not().isURL().isLength({max:255}),
     body('password').trim().notEmpty().isString().isStrongPassword({minLength:6,minUppercase:1,minNumbers:4,minSymbols:1}).not().isURL(),
-    body('fist_name').trim().notEmpty().isString().not().isURL().isLength({max:255}),
+    body('first_name').trim().notEmpty().isString().not().isURL().isLength({max:255}),
     body('last_name').trim().notEmpty().isString().not().isURL().isLength({max:255}),
     body('telephone').trim().notEmpty().isMobilePhone('any').not().isURL().isLength({max:255}),
     (req,res)=>{
@@ -47,12 +48,12 @@ router.post('/register',
 
     const {username, password, email, first_name, last_name, telephone} = req.body;
     const created_at = new Date();
-    const response = db.query('INSERT INTO public.user (username, password, first_name, last_name, telephone, created_at, email) VALUES ($1, $2, $3, $4, $5, $6, $7);',[username, password, first_name, last_name, telephone, created_at, email]);
+    const response = db.query('INSERT INTO public.user (user    name, password, first_name, last_name, telephone, created_at, email) VALUES ($1, $2, $3, $4, $5, $6, $7);',[username, password, first_name, last_name, telephone, created_at, email]);
     res.status(201).send("Your account was registered! :)");
 });
 
 router.post('/login',(req,res)=>{
-
+    
 });
 
 router.get('/:name',(req,res)=>{
