@@ -13,3 +13,5 @@ router.get('/', (req,res)=>{
 //API endpoint to create order items from cart items and after paying
 
 //API endpoint to create order details once user submits after paying
+
+//If product is purchased decrease stock

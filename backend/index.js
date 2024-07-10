@@ -3,12 +3,16 @@ const helmet = require('helmet');
 const app = express();
 const port = 3000;
 const db = require('./db/index.js');
+
+//route imports
 const user = require('./routes/user/index.js');
+const cart = require('./routes/cart/index.js');
 
 app.use(helmet());
 app.use(express.json());
 
 app.use('/user',user);
+app.use('/cart',cart);
 
 app.get('/', async (req, res) => {//Upon entering the site 
     res.send("Hello from Kris");

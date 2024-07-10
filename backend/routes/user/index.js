@@ -48,6 +48,7 @@ router.post('/register',
 
     const {username, password, email, first_name, last_name, telephone} = req.body;
     const created_at = new Date();
+    created_at.setMilliseconds(0);
     const response = db.query('INSERT INTO public.user (user    name, password, first_name, last_name, telephone, created_at, email) VALUES ($1, $2, $3, $4, $5, $6, $7);',[username, password, first_name, last_name, telephone, created_at, email]);
     res.status(201).send("Your account was registered! :)");
 });
@@ -62,14 +63,14 @@ router.get('/:name',(req,res)=>{
 
 
 //fetch user_address table values by user id
-router.get('/user/:name/user_address', (req,res)=>{
+router.get('/:name/user_address', (req,res)=>{
 
 });
 
 
 
 //update user_address value by user id
-router.put('/user/:name/user_address', (req, res) =>{
+router.put('/:name/user_address', (req, res) =>{
 
 })
 
