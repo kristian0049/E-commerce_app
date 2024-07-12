@@ -14,9 +14,13 @@ app.use(express.json());
 app.use('/user',user);
 app.use('/cart',cart);
 
+//Need to fetch all product upon entering home page
 app.get('/', async (req, res) => {//Upon entering the site 
     res.send("Hello from Kris");
+
 });
+
+//Pagination 
 
 app.listen(port, () => {
     console.log('Example app listening on port' + port);
@@ -36,8 +40,6 @@ app.listen(port, () => {
 //Need routing for retrieving products that have filtered used on them
 //Need routing for retrieving product once selected 
 
-//Route for removing an item from the cart
-//Route for adding an item to the cart
 //Route for checking out
 //Route for submmitting purchase
 
