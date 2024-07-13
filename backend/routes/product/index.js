@@ -4,7 +4,6 @@ const db = require('../../db/index.js');
 const {body, validationResult} = require('express-validator');
 const bcrypt = require('bcrypt');
 
-
 router.get('/', (req,res)=>{
     res.send("Hello from product file");
 });
@@ -18,12 +17,10 @@ router.get('/:id', async (req,res) => {
     //by getting discount table and product_inventory
 });
 
-
 //Get all products
 router.get("/all", async (req,res) =>{
     //When fetching all products check if there is a discount
 });
-
 
 //Api endpoint that searches a product either by product id OR category OR if in stock 
 router.get("/all/:genre.:sort", async (req, res) => {
@@ -33,7 +30,6 @@ router.get("/all/:genre.:sort", async (req, res) => {
 router.get("all/:genre", async(req,res)=>{
     //When fetching all products check if there is a discount
 });
-
 
 //Filter by category or by in stock or by name
 router.get("all/:sort", async(req,res)=>{

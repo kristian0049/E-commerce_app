@@ -66,16 +66,19 @@ router.get('/:name',(req,res)=>{
 router.get('/:name/user_address', (req,res)=>{
 
 });
-
-
-
 //update user_address value by user id
 router.put('/:name/user_address', (req, res) =>{
 
-})
+});
 
+//fetch user_payment
+router.get('/:name/user_payment', (req,res) =>{
 
+});
+//update user_payment
+router.post('/:name/user_payment', (req, res) => {
+
+});
 
 //Error handling is last, after all route calls
-
 module.exports = router;

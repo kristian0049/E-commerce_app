@@ -8,10 +8,17 @@ const bcrypt = require('bcrypt');
 router.get('/', (req,res)=>{
     res.send("Hello from order file");
 });
+
 //API endpoint to fetch and/or create payment details
-
-//API endpoint to create order items from cart items and after paying
-
-//API endpoint to create order details once user submits after paying
+//create_order needs order detail, order_items and payment details
+router.post('/create_order',(req,res,next) =>{
+    const {user_id} = req.body;
+    //a form of submitting the order where payment details should be processed ,etc
+});
 
 //If product is purchased decrease stock
+
+//After customer purchased show order details
+router.post('/order_details', (req,res) =>{
+
+});
