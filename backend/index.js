@@ -7,12 +7,16 @@ const db = require('./db/index.js');
 //route imports
 const user = require('./routes/user/index.js');
 const cart = require('./routes/cart/index.js');
+const order = require('./routes/order/index.js');
+const product = require('./routes/product/index.js');
 
 app.use(helmet());
 app.use(express.json());
 
 app.use('/user',user);
 app.use('/cart',cart);
+app.use('/order',order);
+app.use('/product', product);
 
 //Need to fetch all product upon entering home page
 app.get('/', async (req, res) => {//Upon entering the site 

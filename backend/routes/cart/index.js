@@ -4,7 +4,7 @@ const db = require('../../db/index.js');
 const {body, validationResult} = require('express-validator');
 const bcrypt = require('bcrypt');
 
-
+//Fetch shopping sessions with cart items when user enters the site
 router.get('/', (req,res)=>{
     //If user returned to the site, fetch if there were items in the cart
     res.send("Hello from cart file");
