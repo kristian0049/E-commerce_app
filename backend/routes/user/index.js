@@ -3,7 +3,8 @@ const router = express.Router();
 const db = require('../../db/index.js');
 const {body, validationResult} = require('express-validator');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
+const {encrypt, decrypt} = require('../../helper_functions/crypting.js');
+
 router.get('/', (req,res)=>{
     res.send("Hello from user file");
 });
@@ -29,24 +30,35 @@ router.post('/register',
     const salt = await bcrypt.genSalt(12);
     
     const {username, password, email, first_name, last_name, telephone} = req.body;
-    
+    //Encrypt user details and upload to database
     const hashedPassword = await bcrypt.hash(password,salt);
-
-    const algorithm = 'aes-256-cbc';
-    const key = crypto.randomBytes(32);
-    const iv = crypto.randomBytes(16);
+    const enc_first = encrypt(first_name);
+    const enc_last = encrypt(last_name);
+    const enc_tele = encrypt(telephone);
+    const enc_email = encrypt(email);
 
     const created_at = new Date();
     created_at.setMilliseconds(0);
-    const response = db.query('INSERT INTO public.user (user    name, password, first_name, last_name, telephone, created_at, email) VALUES ($1, $2, $3, $4, $5, $6, $7);',[username, hashedPassword, first_name, last_name, telephone, created_at, email]);
+    await db.query('INSERT INTO public.user (username, password, first_name, last_name, telephone, created_at, email, salt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);',[username, hashedPassword, enc_first, enc_last, enc_tele, created_at, enc_email, salt]);
     res.status(201).send("Your account was registered! :)");
 });
 
 //API endpoint to check user log in details, fetch and log in
 //This should check if username or password are in the database and are correct
 //Use salt in database
-router.post('/login',(req,res)=>{
+router.post('/login',async (req,res)=>{
+    const {username, password} = req.body;
+    const response = await db.query('SELECT password FROM public.user WHERE username = $1 ',[username]);
+    const resPass = response.rows[0].password;
+
+    const resBool = await bcrypt.compare(password, resPass);
+
+    if(!resBool){
+        res.status(401).send("Invalid credetials!");
+        return;
+    }
     
+    res.status(200).send(resBool);
 });
 
 //Fetch basic user info name,email,password etc
@@ -90,3 +102,4 @@ router.post('/:name/user_payment', (req, res) => {
 
 //Error handling is last, after all route calls
 module.exports = router;
+

@@ -22,3 +22,5 @@ router.post('/create_order',(req,res,next) =>{
 router.post('/order_details', (req,res) =>{
 
 });
+
+module.exports = router;
