@@ -48,7 +48,7 @@ router.post('/register',
 //Use salt in database
 router.post('/login',async (req,res)=>{
     const {username, password} = req.body;
-    const response = await db.query('SELECT password FROM public.user WHERE username = $1 ',[username]);
+    const response = await db.query('SELECT id, password FROM public.user WHERE username = $1 ',[username]);
     const resPass = response.rows[0].password;
 
     const resBool = await bcrypt.compare(password, resPass);
@@ -58,12 +58,25 @@ router.post('/login',async (req,res)=>{
         return;
     }
     
-    res.status(200).send(resBool);
+    const userid = response.rows[0].id;
+
+    res.status(200).json({user_id:userid});
 });
 
 //Fetch basic user info name,email,password etc
-router.get('/:name',(req,res)=>{
+router.get('/:name', async (req,res)=>{
+    const userId = req.body.user_id;
 
+    const response = await db.query('SELECT username, first_name, last_name, telephone, email FROM public.user WHERE id = $1;',[userId]);
+
+    if(response.rowCount === 0 ) {
+        res.status(404).send("User not found!");
+        return;
+    }
+
+    const {username, first_name, last_name, telephone, email} = response.rows[0];
+    
+    res.status(200).json({username, first_name:decrypt(first_name), last_name:decrypt(last_name), telephone:decrypt(telephone), email:decrypt(email)});
 });
 //Update basic user info
 router.post('/:name',(req,res)=>{
