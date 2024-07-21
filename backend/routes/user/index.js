@@ -10,7 +10,7 @@ router.get('/', (req,res)=>{
 });
 
 router.post('/register',
-    body('email').notEmpty().isEmail().isLength({max:255}),
+    body('email').trim().notEmpty().isEmail().isLength({max:255}),
     body('username').trim().notEmpty().isString().not().isURL().isLength({max:255}),
     body('password').trim().notEmpty().isString().isStrongPassword({minLength:6,minUppercase:1,minNumbers:4,minSymbols:1}).not().isURL(),
     body('first_name').trim().notEmpty().isString().not().isURL().isLength({max:255}),
@@ -26,12 +26,12 @@ router.post('/register',
         res.status(400).send(errors);
         return;
     }
-
-    const salt = await bcrypt.genSalt(12);
     
     const {username, password, email, first_name, last_name, telephone} = req.body;
     //Encrypt user details and upload to database
+    const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password,salt);
+    
     const enc_first = encrypt(first_name);
     const enc_last = encrypt(last_name);
     const enc_tele = encrypt(telephone);
@@ -39,7 +39,7 @@ router.post('/register',
 
     const created_at = new Date();
     created_at.setMilliseconds(0);
-    await db.query('INSERT INTO public.user (username, password, first_name, last_name, telephone, created_at, email, salt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);',[username, hashedPassword, enc_first, enc_last, enc_tele, created_at, enc_email, salt]);
+    await db.query('INSERT INTO public.user (username, password, first_name, last_name, telephone, created_at, email) VALUES ($1, $2, $3, $4, $5, $6, $7);',[username, hashedPassword, enc_first, enc_last, enc_tele, created_at, enc_email]);
     res.status(201).send("Your account was registered! :)");
 });
 
@@ -50,7 +50,6 @@ router.post('/login',async (req,res)=>{
     const {username, password} = req.body;
     const response = await db.query('SELECT id, password FROM public.user WHERE username = $1 ',[username]);
     const resPass = response.rows[0].password;
-
     const resBool = await bcrypt.compare(password, resPass);
 
     if(!resBool){
@@ -70,7 +69,7 @@ router.get('/:name', async (req,res)=>{
     const response = await db.query('SELECT username, first_name, last_name, telephone, email FROM public.user WHERE id = $1;',[userId]);
 
     if(response.rowCount === 0 ) {
-        res.status(404).send("User not found!");
+        res.status(404).send("User details not found!");
         return;
     }
 
@@ -79,15 +78,89 @@ router.get('/:name', async (req,res)=>{
     res.status(200).json({username, first_name:decrypt(first_name), last_name:decrypt(last_name), telephone:decrypt(telephone), email:decrypt(email)});
 });
 //Update basic user info
-router.post('/:name',(req,res)=>{
+router.put('/:name',
+    body('email').trim().notEmpty().isEmail().isLength({max:255}),
+    body('username').trim().notEmpty().isString().not().isURL().isLength({max:255}), 
+    body('first_name').trim().notEmpty().isString().not().isURL().isLength({max:255}),
+    body('last_name').trim().notEmpty().isString().not().isURL().isLength({max:255}),
+    body('telephone').trim().notEmpty().isMobilePhone('any').not().isURL().isLength({max:255})
+,async (req,res)=>{
     
-})
+    const result = validationResult(req);
+    if(!result.isEmpty()){
+        const errors = result.array();
+        
+        res.status(400).send(errors);
+        return;
+    }
+
+    //Check if the values are not the same as the current ones by user id
+    //If not the same then proceed to update
+
+    const {email, username, first_name, last_name, telephone, user_id} = req.body;
+
+    const getValuesToCompare = await db.query('SELECT first_name FROM public.user WHERE username = $1 AND NOT id = $2;',[username, user_id]);
+  
+    if(getValuesToCompare.rowCount > 0) {
+        res.status(409).send("Username already Exists!");
+        return;
+    }
+
+    const enc_first = encrypt(first_name);
+    const enc_last = encrypt(last_name);
+    const enc_tele = encrypt(telephone);
+    const enc_email = encrypt(email);
+    const modified_at = new Date();
+    modified_at.setMilliseconds(0);
+
+    await db.query('UPDATE public.user SET username = $1, first_name = $2, last_name= $3, email = $4, telephone = $5 modified_at = $6 WHERE id = $7;',[username, enc_first, enc_last, enc_email, enc_tele,  modified_at, user_id]);
+    
+    res.status(200).send("Account details updated!");
+
+});
+
+//route for checking if the password is the same when trying to update password
+router.put('/:name/update_password',  
+body('password').trim().notEmpty().isString().isStrongPassword({minLength:6,minUppercase:1,minNumbers:4,minSymbols:1}).not().isURL(),
+async (req,res)=>{
+    const result = validationResult(req);
+    if(!result.isEmpty()){
+        const errors = result.array();
+        
+        res.status(400).send(errors);
+        return;
+    }
+
+    const getPassword = await db.query('SELECT password FROM public.user WHERE id = $1;',[user_id]);
+
+    if(getPassword.rowCount === 0){
+        res.status(404).send("Not found!");
+        return;
+    }
+
+    const {password, user_id} = req.body;
+
+    const resBool = await bcrypt.compare(password, getPassword.rows[0].password);
+
+    if(resBool === true){
+        res.status(409).send("The password is the same!");
+        return;
+    }
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(password,salt);
+    const modified_at = new Date();
+    modified_at.setMilliseconds(0);
+    
+    await db.query('UPDATE public.user SET password = $1, modified_at = $2 WHERE id = $3;',[ hashedPassword, modified_at, user_id]);
+
+    res.status(200).send("Password successfully updated!");
+});
 
 //API endpoint to fetch user address by user id
 //Upon opening the profile page or when paying fetch user's address information if available
 //fetch user_address table values by user id
 router.get('/:name/user_address', (req,res)=>{
-
+    
 });
 
 //API endpoint to set user personnel details / user address 
