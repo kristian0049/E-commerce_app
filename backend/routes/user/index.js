@@ -159,15 +159,35 @@ async (req,res)=>{
 //API endpoint to fetch user address by user id
 //Upon opening the profile page or when paying fetch user's address information if available
 //fetch user_address table values by user id
-router.get('/:name/user_address', (req,res)=>{
+router.get('/:name/user_address', async (req,res)=>{
+    const {user_id} = req.body;
+    
+    const response = await db.query('SELECT address_line1, address_line2, city, postal_code, country, telephone, mobile FROM user_address WHERE user_id = $1;',[user_id]);
+
+    if(response.rowCount === 0 ){
+        res.status(404).send("No address for this user!");
+        return;
+    }
+
+    const obj = {
+        address_line1:decrypt(response.rows[0].address_line1),
+        address_line2:decrypt(response.rows[0].address_line2),
+        city: decrypt(response.rows[0].city),
+        postal_code: decrypt(response.rows[0].postal_code),
+        country: decrypt(response.rows[0].country),
+        telephone: decrypt(response.rows[0].telephone),
+        mobile: decrypt(response.rows[0].mobile),
+    }
+    res.status(200).json(obj);
     
 });
 
 //API endpoint to set user personnel details / user address 
 //update user_address value by user id
 //User must set address line 1 , address line 2 is optional, city , postal code, telephone/phone number, mobile
-router.put('/:name/user_address', (req, res) =>{
-
+router.put('/:name/user_address', async (req, res) =>{
+    const {user_id} = req.body;
+    const response = await db.query('SELECT address_line1, address_line2, city, postal_code, country, telephone, mobile FROM user_address WHERE user_id = $1;',[user_id]);
 });
 
 //API endpoint to set user payment if user chooses to remember it otherwise delete after transaction finishes
