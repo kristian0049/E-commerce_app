@@ -164,7 +164,7 @@ router.get('/:name/user_address', async (req,res)=>{
     
     const response = await db.query('SELECT address_line1, address_line2, city, postal_code, country, telephone, mobile FROM user_address WHERE user_id = $1;',[user_id]);
 
-    if(response.rowCount === 0 ){
+    if( response.rowCount === 0 ){
         res.status(404).send("No address for this user!");
         return;
     }
@@ -186,8 +186,17 @@ router.get('/:name/user_address', async (req,res)=>{
 //update user_address value by user id
 //User must set address line 1 , address line 2 is optional, city , postal code, telephone/phone number, mobile
 router.put('/:name/user_address', async (req, res) =>{
-    const {user_id} = req.body;
+    const {user_id, address_line1, address_line2, city, postal_code, country, telephone, mobile} = req.body;
     const response = await db.query('SELECT address_line1, address_line2, city, postal_code, country, telephone, mobile FROM user_address WHERE user_id = $1;',[user_id]);
+
+    if( response.rowCount === 0 ){
+        await db.query('INSERT INTO user_address (address_line1, address_line2, city, postal_code, country, telephone, mobile, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);',[address_line1, address_line2, city, postal_code, country, telephone, mobile, user_id])
+        res.status(201).send("No data was found with this user, so new data was created and addded as new!");
+    }
+
+    await db.query('UPDATE user_address SET address_line1 = $1, address_line2 = $2, city = $3, postal_code = $4, country = $5, telephone = $6, mobile = $7 WHERE user_id = $8 ;',[address_line1, address_line2, city, postal_code, country, telephone, mobile])
+
+    res.status(200).send("User address has been updated!");
 });
 
 //API endpoint to set user payment if user chooses to remember it otherwise delete after transaction finishes
