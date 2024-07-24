@@ -9,6 +9,8 @@ router.get('/', (req,res)=>{
     res.send("Hello from user file");
 });
 
+//Register user
+//First sanitize and validate
 router.post('/register',
     body('email').trim().notEmpty().isEmail().isLength({max:255}),
     body('username').trim().notEmpty().isString().not().isURL().isLength({max:255}),
@@ -31,25 +33,28 @@ router.post('/register',
     //Encrypt user details and upload to database
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password,salt);
-    
     const enc_first = encrypt(first_name);
     const enc_last = encrypt(last_name);
     const enc_tele = encrypt(telephone);
     const enc_email = encrypt(email);
 
     const created_at = new Date();
-    created_at.setMilliseconds(0);
+    created_at.setMilliseconds(0);//Remove the milliseconds
     await db.query('INSERT INTO public.user (username, password, first_name, last_name, telephone, created_at, email) VALUES ($1, $2, $3, $4, $5, $6, $7);',[username, hashedPassword, enc_first, enc_last, enc_tele, created_at, enc_email]);
     res.status(201).send("Your account was registered! :)");
 });
 
 //API endpoint to check user log in details, fetch and log in
 //This should check if username or password are in the database and are correct
-//Use salt in database
 router.post('/login',async (req,res)=>{
     const {username, password} = req.body;
     const response = await db.query('SELECT id, password FROM public.user WHERE username = $1 ',[username]);
     const resPass = response.rows[0].password;
+    if(response.rowCount === 0){
+        res.status(404).send("User not found, please check your credentials!");
+        return;
+    }
+
     const resBool = await bcrypt.compare(password, resPass);
 
     if(!resBool){
@@ -63,9 +68,8 @@ router.post('/login',async (req,res)=>{
 });
 
 //Fetch basic user info name,email,password etc
-router.get('/:name', async (req,res)=>{
+router.get('/:name',body('user_id').trim().notEmpty().isNumeric(),async (req,res)=>{
     const userId = req.body.user_id;
-
     const response = await db.query('SELECT username, first_name, last_name, telephone, email FROM public.user WHERE id = $1;',[userId]);
 
     if(response.rowCount === 0 ) {
@@ -77,8 +81,10 @@ router.get('/:name', async (req,res)=>{
     
     res.status(200).json({username, first_name:decrypt(first_name), last_name:decrypt(last_name), telephone:decrypt(telephone), email:decrypt(email)});
 });
+
 //Update basic user info
 router.put('/:name',
+    body('user_id').trim().notEmpty().isNumeric(),
     body('email').trim().notEmpty().isEmail().isLength({max:255}),
     body('username').trim().notEmpty().isString().not().isURL().isLength({max:255}), 
     body('first_name').trim().notEmpty().isString().not().isURL().isLength({max:255}),
@@ -116,11 +122,11 @@ router.put('/:name',
     await db.query('UPDATE public.user SET username = $1, first_name = $2, last_name= $3, email = $4, telephone = $5 modified_at = $6 WHERE id = $7;',[username, enc_first, enc_last, enc_email, enc_tele,  modified_at, user_id]);
     
     res.status(200).send("Account details updated!");
-
 });
 
 //route for checking if the password is the same when trying to update password
-router.put('/:name/update_password',  
+router.put('/:name/update_password',
+body('user_id').trim().notEmpty().isNumeric(),  
 body('password').trim().notEmpty().isString().isStrongPassword({minLength:6,minUppercase:1,minNumbers:4,minSymbols:1}).not().isURL(),
 async (req,res)=>{
     const result = validationResult(req);
@@ -159,7 +165,9 @@ async (req,res)=>{
 //API endpoint to fetch user address by user id
 //Upon opening the profile page or when paying fetch user's address information if available
 //fetch user_address table values by user id
-router.get('/:name/user_address', async (req,res)=>{
+router.get('/:name/user_address', 
+    body('user_id').trim().notEmpty().isNumeric()
+    ,async (req,res)=>{
     const {user_id} = req.body;
     
     const response = await db.query('SELECT address_line1, address_line2, city, postal_code, country, telephone, mobile FROM user_address WHERE user_id = $1;',[user_id]);
@@ -185,9 +193,24 @@ router.get('/:name/user_address', async (req,res)=>{
 //API endpoint to set user personnel details / user address 
 //update user_address value by user id
 //User must set address line 1 , address line 2 is optional, city , postal code, telephone/phone number, mobile
-router.put('/:name/user_address', async (req, res) =>{
+router.put('/:name/user_address', 
+    body('user_id').trim().notEmpty().isNumeric(),
+    body('address_line1').trim().notEmpty().isString().isLength({min:1, max:255}),
+    body('city').trim().notEmpty().isString().isLength({min:1, max:255}),
+    body('postal_code').trim().notEmpty().isString().isLength({min:1, max:55}),
+    body('country').trim().notEmpty().isString().isLength({min:1, max:255}),
+    body('mobile').trim().notEmpty().isMobilePhone('any').isLength({min:1, max:255}),
+    async (req, res) =>{
     const {user_id, address_line1, address_line2, city, postal_code, country, telephone, mobile} = req.body;
     const response = await db.query('SELECT address_line1, address_line2, city, postal_code, country, telephone, mobile FROM user_address WHERE user_id = $1;',[user_id]);
+    
+    const enc_add_line1 = encrypt(address_line1);
+    const enc_add_line2 = encrypt(address_line2);
+    const enc_city = encrypt(city);
+    const enc_postal_code = encrypt(postal_code);
+    const enc_country = encrypt(country);
+    const enc_tele = encrypt(telephone);
+    const enc_mobile = encrypt(mobile);
 
     if( response.rowCount === 0 ){
         await db.query('INSERT INTO user_address (address_line1, address_line2, city, postal_code, country, telephone, mobile, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);',[address_line1, address_line2, city, postal_code, country, telephone, mobile, user_id])
@@ -207,7 +230,9 @@ router.put('/:name/user_address', async (req, res) =>{
 //api endpoint to fetch user payment by user id
 //Upon opening the profile page or when paying fetch user's address information if available
 
-router.get('/:name/user_payment', (req,res) =>{
+router.get('/:name/user_payment', async (req,res) =>{
+    const {user_id} = req.body;
+    const response = await db.query('SELECT id, payment_type, provider, account_no')
 
 });
 //update user_payment
