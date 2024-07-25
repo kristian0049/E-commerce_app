@@ -196,6 +196,7 @@ router.get('/:name/user_address',
 router.put('/:name/user_address', 
     body('user_id').trim().notEmpty().isNumeric(),
     body('address_line1').trim().notEmpty().isString().isLength({min:1, max:255}),
+    body('address_line1').optional().trim().notEmpty().isString().isLength({min:1, max:255}),
     body('city').trim().notEmpty().isString().isLength({min:1, max:255}),
     body('postal_code').trim().notEmpty().isString().isLength({min:1, max:55}),
     body('country').trim().notEmpty().isString().isLength({min:1, max:255}),
@@ -211,15 +212,26 @@ router.put('/:name/user_address',
     const enc_country = encrypt(country);
     const enc_tele = encrypt(telephone);
     const enc_mobile = encrypt(mobile);
-
-    if( response.rowCount === 0 ){
-        await db.query('INSERT INTO user_address (address_line1, address_line2, city, postal_code, country, telephone, mobile, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);',[address_line1, address_line2, city, postal_code, country, telephone, mobile, user_id])
-        res.status(201).send("No data was found with this user, so new data was created and addded as new!");
+    if(address_line2){
+        if( response.rowCount === 0 ){
+            await db.query('INSERT INTO user_address (address_line1, address_line2, city, postal_code, country, telephone, mobile, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);',[address_line1, address_line2, city, postal_code, country, telephone, mobile, user_id])
+            res.status(201).send("No data was found with this user, so new data was created and addded as new!");
+        }
+    
+        await db.query('UPDATE user_address SET address_line1 = $1, address_line2 = $2, city = $3, postal_code = $4, country = $5, telephone = $6, mobile = $7 WHERE user_id = $8 ;',[address_line1, address_line2, city, postal_code, country, telephone, mobile])
+    
+        res.status(200).send("User address has been updated!");
+    }else{
+        if( response.rowCount === 0 ){
+            await db.query('INSERT INTO user_address (address_line1,  city, postal_code, country, telephone, mobile, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7);',[address_line1, city, postal_code, country, telephone, mobile, user_id])
+            res.status(201).send("No data was found with this user, so new data was created and addded as new!");
+        }
+    
+        await db.query('UPDATE user_address SET address_line1 = $1,  city = $2, postal_code = $3, country = $4, telephone = $5, mobile = $6 WHERE user_id = $7 ;',[address_line1,  city, postal_code, country, telephone, mobile, user_id])
+    
+        res.status(200).send("User address has been updated!");
     }
-
-    await db.query('UPDATE user_address SET address_line1 = $1, address_line2 = $2, city = $3, postal_code = $4, country = $5, telephone = $6, mobile = $7 WHERE user_id = $8 ;',[address_line1, address_line2, city, postal_code, country, telephone, mobile])
-
-    res.status(200).send("User address has been updated!");
+   
 });
 
 //API endpoint to set user payment if user chooses to remember it otherwise delete after transaction finishes
@@ -232,11 +244,30 @@ router.put('/:name/user_address',
 
 router.get('/:name/user_payment', async (req,res) =>{
     const {user_id} = req.body;
-    const response = await db.query('SELECT id, payment_type, provider, account_no')
+    const response = await db.query('SELECT payment_type, provider, account_no, expiry FROM user_payment;');
 
+    if(response.rowCount === 0){
+        res.status(404).send("User payment data was not found!");
+        return;
+    }
+
+    const obj = {
+        payment_type: decrypt(response.rows[0].payment_type),
+        provider: decrypt(response.rows[0].provider),
+        account_no: decrypt(response.rows[0].account_no),
+        expiry: decrypt(response.rows[0].expiry)
+    };
+
+    res.status(200).json(obj);
 });
 //update user_payment
-router.post('/:name/user_payment', (req, res) => {
+router.post('/:name/user_payment',
+    body('user_id').trim().notEmpty().isNumeric(), 
+    body('account_no').trim().notEmpty().isCreditCard({'provider':'visa' | 'mastercard'}),
+    body('payment_type').trim().notEmpty().isString().isLength({min:1,max:128}),
+    body('provider').trim().notEmpty().isString().isLength({min:1,max:128}),
+    body('expiry').trim().notEmpty().isDate({format:'string'}),
+    async (req, res) => {
 
 });
 
