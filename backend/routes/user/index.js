@@ -260,16 +260,55 @@ router.get('/:name/user_payment', async (req,res) =>{
 
     res.status(200).json(obj);
 });
-//update user_payment
+//create user_payment
 router.post('/:name/user_payment',
     body('user_id').trim().notEmpty().isNumeric(), 
     body('account_no').trim().notEmpty().isCreditCard({'provider':'visa' | 'mastercard'}),
     body('payment_type').trim().notEmpty().isString().isLength({min:1,max:128}),
     body('provider').trim().notEmpty().isString().isLength({min:1,max:128}),
-    body('expiry').trim().notEmpty().isDate({format:'string'}),
+    body('expiry').trim().notEmpty().isDate({format:'MM/YY', delimiters:['/']}),
     async (req, res) => {
-
+        const {user_id, account_no, payment_type, provider, expiry} = req.body;
+        const response = await db.query('SELECT COUNT(1) FROM user_payment WHERE user_id = $1;',[user_id]);
+        
+        const encrypted_data = [user_id, payment_type, encrypt(provider), encrypt(account_no), expiry];
+        //Need to check if account_no is the same as other existing
+        await db.query('INSERT INTO user_payment (user_id, payment_type, provider, account_no, expiry) VALUES ($1, $2, $3, $4, $5);',encrypted_data);
+        res.status(201).send("No available user_payment option was available and a new one was created!");
+        return;
 });
+
+//update user_payment
+router.put('/:name/user_payment/:id',
+    body('user_id').trim().notEmpty().isNumeric(), 
+    body('account_no').trim().notEmpty().isCreditCard({'provider':'visa' | 'mastercard'}),
+    body('payment_type').trim().notEmpty().isString().isLength({min:1,max:128}),
+    body('provider').trim().notEmpty().isString().isLength({min:1,max:128}),
+    body('expiry').trim().notEmpty().isDate({format:'MM/YY', delimiters:['/']}),
+    async (req, res) => {
+        const {user_id, account_no, payment_type, provider, expiry} = req.body;
+        const response = await db.query('SELECT COUNT(1) FROM user_payment WHERE user_id = $1;',[user_id]);
+        
+        if(response.rowCount === 0){
+            res.status(404).send('Payment option not found!');
+            return;
+        }
+
+        const encrypted_data = [payment_type, encrypt(provider), encrypt(account_no), expiry, user_id];
+
+        await db.query('UPDATE user_payment SET payment_type = $1 , provider = $2, account_no = $3, expiry = $4 WHERE user_id = $5;',encrypted_data);
+        res.status(200).send("Updated user payment option!");
+        return;
+});
+
+router.delete('/:name/user_payment/:id', async(req,res)=>{
+    const {id} = req.params;
+
+    await db.query('DELETE FROM user_payment WHERE id = $1',[id]);
+
+    res.status(200).send("Payment deleted!");
+
+})
 
 //Error handling is last, after all route calls
 module.exports = router;
