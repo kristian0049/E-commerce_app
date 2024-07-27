@@ -68,7 +68,7 @@ router.post('/login',async (req,res)=>{
 });
 
 //Fetch basic user info name,email,password etc
-router.get('/:name',body('user_id').trim().notEmpty().isNumeric(),async (req,res)=>{
+router.get('/:username',body('user_id').trim().notEmpty().isNumeric(),async (req,res)=>{
     const userId = req.body.user_id;
     const response = await db.query('SELECT username, first_name, last_name, telephone, email FROM public.user WHERE id = $1;',[userId]);
 
