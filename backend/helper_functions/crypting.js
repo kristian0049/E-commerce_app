@@ -2,10 +2,9 @@ require('dotenv').config();
 const crypto = require('crypto');
 const {Buffer} = require('node:buffer');
 const algorithm = 'aes-256-cbc';
-const key = process.env.SECRET_ENC_KEY;
-//Key is the issue
+const key = Buffer.from(process.env.SECRET_ENC_KEY,'hex');
+
 function encrypt(value){
-    console.log(key);
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv(algorithm, key, iv);
     let encrypted = cipher.update(value, 'utf8', 'hex');

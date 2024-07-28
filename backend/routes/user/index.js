@@ -4,7 +4,7 @@ const db = require('../../db/index.js');
 const {body, validationResult} = require('express-validator');
 const bcrypt = require('bcrypt');
 const {encrypt, decrypt} = require('../../helper_functions/crypting.js');
-
+//THink about username route
 router.get('/', (req,res)=>{
     res.send("Hello from user file");
 });
@@ -16,7 +16,7 @@ router.post('/register',
     body('username').trim().notEmpty().isString().not().isURL().isLength({max:255}),
     body('password').trim().notEmpty().isString().isStrongPassword({minLength:6,minUppercase:1,minNumbers:4,minSymbols:1}).not().isURL(),
     body('first_name').trim().notEmpty().isString().not().isURL().isLength({max:255}),
-    body('last_name').trim().notEmpty().isString().not().isURL().isLength({max:255}),
+    body('last_name').optional().trim().notEmpty().isString().not().isURL().isLength({max:255}),
     body('telephone').trim().notEmpty().isMobilePhone('any').not().isURL().isLength({max:255}),
     async (req,res)=>{
     /*Check first if we had any issues with user input
@@ -50,6 +50,7 @@ router.post('/login',async (req,res)=>{
     const {username, password} = req.body;
     const response = await db.query('SELECT id, password FROM public.user WHERE username = $1 ',[username]);
     const resPass = response.rows[0].password;
+
     if(response.rowCount === 0){
         res.status(404).send("User not found, please check your credentials!");
         return;
@@ -83,12 +84,12 @@ router.get('/:username',body('user_id').trim().notEmpty().isNumeric(),async (req
 });
 
 //Update basic user info
-router.put('/:name',
+router.put('/:username',
     body('user_id').trim().notEmpty().isNumeric(),
     body('email').trim().notEmpty().isEmail().isLength({max:255}),
     body('username').trim().notEmpty().isString().not().isURL().isLength({max:255}), 
     body('first_name').trim().notEmpty().isString().not().isURL().isLength({max:255}),
-    body('last_name').trim().notEmpty().isString().not().isURL().isLength({max:255}),
+    body('last_name').optional().trim().notEmpty().isString().not().isURL().isLength({max:255}),
     body('telephone').trim().notEmpty().isMobilePhone('any').not().isURL().isLength({max:255})
 ,async (req,res)=>{
     
@@ -105,7 +106,8 @@ router.put('/:name',
 
     const {email, username, first_name, last_name, telephone, user_id} = req.body;
 
-    const getValuesToCompare = await db.query('SELECT first_name FROM public.user WHERE username = $1 AND NOT id = $2;',[username, user_id]);
+    //If the user wants to update the username, we check if it exists in the database then continue
+    const getValuesToCompare = await db.query('SELECT 1 FROM public.user WHERE username = $1 AND NOT id = $2;',[username, user_id]);
   
     if(getValuesToCompare.rowCount > 0) {
         res.status(409).send("Username already Exists!");
@@ -118,14 +120,14 @@ router.put('/:name',
     const enc_email = encrypt(email);
     const modified_at = new Date();
     modified_at.setMilliseconds(0);
+ 
+    await db.query('UPDATE public.user SET username = $1, first_name = $2, last_name= $3, email = $4, telephone = $5, modified_at = $6 WHERE id = $7;',[username, enc_first, enc_last, enc_email, enc_tele,  modified_at, user_id]);
 
-    await db.query('UPDATE public.user SET username = $1, first_name = $2, last_name= $3, email = $4, telephone = $5 modified_at = $6 WHERE id = $7;',[username, enc_first, enc_last, enc_email, enc_tele,  modified_at, user_id]);
-    
     res.status(200).send("Account details updated!");
 });
 
 //route for checking if the password is the same when trying to update password
-router.put('/:name/update_password',
+router.put('/:username/update_password',
 body('user_id').trim().notEmpty().isNumeric(),  
 body('password').trim().notEmpty().isString().isStrongPassword({minLength:6,minUppercase:1,minNumbers:4,minSymbols:1}).not().isURL(),
 async (req,res)=>{
@@ -137,6 +139,8 @@ async (req,res)=>{
         return;
     }
 
+    const {password, user_id} = req.body;
+
     const getPassword = await db.query('SELECT password FROM public.user WHERE id = $1;',[user_id]);
 
     if(getPassword.rowCount === 0){
@@ -144,7 +148,7 @@ async (req,res)=>{
         return;
     }
 
-    const {password, user_id} = req.body;
+
 
     const resBool = await bcrypt.compare(password, getPassword.rows[0].password);
 
@@ -269,7 +273,7 @@ router.post('/:name/user_payment',
     body('expiry').trim().notEmpty().isDate({format:'MM/YY', delimiters:['/']}),
     async (req, res) => {
         const {user_id, account_no, payment_type, provider, expiry} = req.body;
-        const response = await db.query('SELECT COUNT(1) FROM user_payment WHERE user_id = $1;',[user_id]);
+        const response = await db.query('SELECT 1 FROM user_payment WHERE user_id = $1;',[user_id]);
         
         const encrypted_data = [user_id, payment_type, encrypt(provider), encrypt(account_no), expiry];
         //Need to check if account_no is the same as other existing
@@ -287,7 +291,7 @@ router.put('/:name/user_payment/:id',
     body('expiry').trim().notEmpty().isDate({format:'MM/YY', delimiters:['/']}),
     async (req, res) => {
         const {user_id, account_no, payment_type, provider, expiry} = req.body;
-        const response = await db.query('SELECT COUNT(1) FROM user_payment WHERE user_id = $1;',[user_id]);
+        const response = await db.query('SELECT 1 FROM user_payment WHERE user_id = $1;',[user_id]);
         
         if(response.rowCount === 0){
             res.status(404).send('Payment option not found!');
