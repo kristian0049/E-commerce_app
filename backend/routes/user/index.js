@@ -174,21 +174,20 @@ router.get('/:name/user_address',
     ,async (req,res)=>{
     const {user_id} = req.body;
     
-    const response = await db.query('SELECT address_line1, address_line2, city, postal_code, country, telephone, mobile FROM user_address WHERE user_id = $1;',[user_id]);
+    const response = await db.query('SELECT address_line1, address_line2, city, postal_code, country, telephone FROM user_address WHERE user_id = $1;',[user_id]);
 
     if( response.rowCount === 0 ){
         res.status(404).send("No address for this user!");
         return;
     }
-
+    const isAddressLine2 =  response.rows[0].address_line2 === null ? null : decrypt(response.rows[0].address_line2);
     const obj = {
         address_line1:decrypt(response.rows[0].address_line1),
-        address_line2:decrypt(response.rows[0].address_line2),
+        address_line2:isAddressLine2,
         city: decrypt(response.rows[0].city),
         postal_code: decrypt(response.rows[0].postal_code),
         country: decrypt(response.rows[0].country),
-        telephone: decrypt(response.rows[0].telephone),
-        mobile: decrypt(response.rows[0].mobile),
+        telephone: decrypt(response.rows[0].telephone)
     }
     res.status(200).json(obj);
     
@@ -197,41 +196,43 @@ router.get('/:name/user_address',
 //API endpoint to set user personnel details / user address 
 //update user_address value by user id
 //User must set address line 1 , address line 2 is optional, city , postal code, telephone/phone number, mobile
-router.put('/:name/user_address', 
+router.post('/:name/user_address', 
     body('user_id').trim().notEmpty().isNumeric(),
     body('address_line1').trim().notEmpty().isString().isLength({min:1, max:255}),
-    body('address_line1').optional().trim().notEmpty().isString().isLength({min:1, max:255}),
+    body('address_line2').optional().trim().notEmpty().isString().isLength({min:1, max:255}),
     body('city').trim().notEmpty().isString().isLength({min:1, max:255}),
     body('postal_code').trim().notEmpty().isString().isLength({min:1, max:55}),
     body('country').trim().notEmpty().isString().isLength({min:1, max:255}),
-    body('mobile').trim().notEmpty().isMobilePhone('any').isLength({min:1, max:255}),
+    body('telephone').trim().notEmpty().isMobilePhone('any').isLength({min:1, max:255}),
     async (req, res) =>{
-    const {user_id, address_line1, address_line2, city, postal_code, country, telephone, mobile} = req.body;
-    const response = await db.query('SELECT address_line1, address_line2, city, postal_code, country, telephone, mobile FROM user_address WHERE user_id = $1;',[user_id]);
+    const {user_id, address_line1, address_line2, city, postal_code, country, telephone} = req.body;
+    const response = await db.query('SELECT address_line1, address_line2, city, postal_code, country, telephone FROM user_address WHERE user_id = $1;',[user_id]);
     
     const enc_add_line1 = encrypt(address_line1);
-    const enc_add_line2 = encrypt(address_line2);
     const enc_city = encrypt(city);
     const enc_postal_code = encrypt(postal_code);
     const enc_country = encrypt(country);
     const enc_tele = encrypt(telephone);
-    const enc_mobile = encrypt(mobile);
+
     if(address_line2){
+        const enc_add_line2 = encrypt(address_line2);
         if( response.rowCount === 0 ){
-            await db.query('INSERT INTO user_address (address_line1, address_line2, city, postal_code, country, telephone, mobile, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);',[address_line1, address_line2, city, postal_code, country, telephone, mobile, user_id])
+            await db.query('INSERT INTO user_address (address_line1, address_line2, city, postal_code, country, telephone, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7);',[enc_add_line1, enc_add_line2, enc_city, enc_postal_code, enc_country, enc_tele, user_id])
             res.status(201).send("No data was found with this user, so new data was created and addded as new!");
+            return;
         }
     
-        await db.query('UPDATE user_address SET address_line1 = $1, address_line2 = $2, city = $3, postal_code = $4, country = $5, telephone = $6, mobile = $7 WHERE user_id = $8 ;',[address_line1, address_line2, city, postal_code, country, telephone, mobile])
+        await db.query('UPDATE user_address SET address_line1 = $1, address_line2 = $2, city = $3, postal_code = $4, country = $5, telephone = $6, WHERE user_id = $7 ;',[enc_add_line1, enc_add_line2, enc_city, enc_postal_code, enc_country, enc_tele, user_id])
     
         res.status(200).send("User address has been updated!");
     }else{
         if( response.rowCount === 0 ){
-            await db.query('INSERT INTO user_address (address_line1,  city, postal_code, country, telephone, mobile, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7);',[address_line1, city, postal_code, country, telephone, mobile, user_id])
+            await db.query('INSERT INTO user_address (address_line1,  city, postal_code, country, telephone,  user_id) VALUES ($1, $2, $3, $4, $5, $6);',[enc_add_line1, enc_city, enc_postal_code, enc_country, enc_tele, user_id])
             res.status(201).send("No data was found with this user, so new data was created and addded as new!");
+            return;
         }
     
-        await db.query('UPDATE user_address SET address_line1 = $1,  city = $2, postal_code = $3, country = $4, telephone = $5, mobile = $6 WHERE user_id = $7 ;',[address_line1,  city, postal_code, country, telephone, mobile, user_id])
+        await db.query('UPDATE user_address SET address_line1 = $1,  city = $2, postal_code = $3, country = $4, telephone = $5 WHERE user_id = $6 ;',[enc_add_line1, enc_city, enc_postal_code, enc_country, enc_tele, user_id])
     
         res.status(200).send("User address has been updated!");
     }
