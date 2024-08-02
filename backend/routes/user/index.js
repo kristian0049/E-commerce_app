@@ -249,7 +249,7 @@ router.post('/:name/user_address',
 
 router.get('/:name/user_payment', async (req,res) =>{
     const {user_id} = req.body;
-    const response = await db.query('SELECT payment_type, provider, account_no, expiry FROM user_payment;');
+    const response = await db.query('SELECT id, payment_type, provider, account_no, expiry FROM user_payment;');
 
     if(response.rowCount === 0){
         res.status(404).send("User payment data was not found!");
@@ -257,10 +257,11 @@ router.get('/:name/user_payment', async (req,res) =>{
     }
 
     const obj = {
-        payment_type: decrypt(response.rows[0].payment_type),
+        id: response.rows[0].id,
+        payment_type: response.rows[0].payment_type,
         provider: decrypt(response.rows[0].provider),
         account_no: decrypt(response.rows[0].account_no),
-        expiry: decrypt(response.rows[0].expiry)
+        expiry: response.rows[0].expiry
     };
 
     res.status(200).json(obj);
@@ -275,33 +276,32 @@ router.post('/:name/user_payment',
     async (req, res) => {
         const {user_id, account_no, payment_type, provider, expiry} = req.body;
         const response = await db.query('SELECT 1 FROM user_payment WHERE user_id = $1;',[user_id]);
-        
         const encrypted_data = [user_id, payment_type, encrypt(provider), encrypt(account_no), expiry];
         //Need to check if account_no is the same as other existing
-        await db.query('INSERT INTO user_payment (user_id, payment_type, provider, account_no, expiry) VALUES ($1, $2, $3, $4, $5);',encrypted_data);
-        res.status(201).send("No available user_payment option was available and a new one was created!");
+        await db.query("INSERT INTO user_payment (user_id, payment_type, provider, account_no, expiry) VALUES ($1, $2, $3, $4, $5);",encrypted_data);
+        res.status(201).send("Created a new user payment option!");
         return;
 });
 
 //update user_payment
 router.put('/:name/user_payment/:id',
-    body('user_id').trim().notEmpty().isNumeric(), 
     body('account_no').trim().notEmpty().isCreditCard({'provider':'visa' | 'mastercard'}),
     body('payment_type').trim().notEmpty().isString().isLength({min:1,max:128}),
     body('provider').trim().notEmpty().isString().isLength({min:1,max:128}),
     body('expiry').trim().notEmpty().isDate({format:'MM/YY', delimiters:['/']}),
     async (req, res) => {
-        const {user_id, account_no, payment_type, provider, expiry} = req.body;
-        const response = await db.query('SELECT 1 FROM user_payment WHERE user_id = $1;',[user_id]);
+        const {id} = req.params;
+        const { account_no, payment_type, provider, expiry} = req.body;
+        const response = await db.query('SELECT 1 FROM user_payment WHERE id = $1;',[id]);
         
         if(response.rowCount === 0){
             res.status(404).send('Payment option not found!');
             return;
         }
 
-        const encrypted_data = [payment_type, encrypt(provider), encrypt(account_no), expiry, user_id];
+        const encrypted_data = [payment_type, encrypt(provider), encrypt(account_no), expiry, id];
 
-        await db.query('UPDATE user_payment SET payment_type = $1 , provider = $2, account_no = $3, expiry = $4 WHERE user_id = $5;',encrypted_data);
+        await db.query('UPDATE user_payment SET payment_type = $1 , provider = $2, account_no = $3, expiry = $4 WHERE id = $5;',encrypted_data);
         res.status(200).send("Updated user payment option!");
         return;
 });
