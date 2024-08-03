@@ -5,7 +5,7 @@ const {body, validationResult} = require('express-validator');
 const bcrypt = require('bcrypt');
 
 router.get('/', (req,res)=>{
-    res.send("Hello from product file");
+    res.send("Hello from product file!!");
 });
 
 //Get product by id 
